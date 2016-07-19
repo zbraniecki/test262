@@ -42,8 +42,8 @@ def ReportError(s):
 
 
 if not os.path.exists(EXCLUDED_FILENAME):
-    print "Cannot generate (JSON) test262 tests without a file," + \
-        " %s, showing which tests have been disabled!" % EXCLUDED_FILENAME
+    print("Cannot generate (JSON) test262 tests without a file," + \
+        " %s, showing which tests have been disabled!" % EXCLUDED_FILENAME)
     sys.exit(1)
 EXCLUDE_LIST = xml.dom.minidom.parse(EXCLUDED_FILENAME)
 EXCLUDE_REASON = EXCLUDE_LIST.getElementsByTagName("reason")
@@ -111,24 +111,24 @@ class TempFile(object):
         text = self.text)
 
   def Write(self, str):
-    os.write(self.fd, str)
+    f = open(self.fd, 'w')
+    f.write(str)
+    f.close()
 
   def Read(self):
-    f = file(self.name)
+    f = open(self.name)
     result = f.read()
     f.close()
     return result
 
   def Close(self):
-    if not self.is_closed:
-      self.is_closed = True
-      os.close(self.fd)
+      pass
 
   def Dispose(self):
     try:
       self.Close()
       os.unlink(self.name)
-    except OSError, e:
+    except OSError as e:
       logging.error("Error disposing temp file: %s", str(e))
 
 
@@ -145,20 +145,20 @@ class TestResult(object):
     mode = self.case.GetMode()
     if self.HasUnexpectedOutcome():
       if self.case.IsNegative():
-        print "=== %s was expected to fail in %s, but didn't ===" % (name, mode)
-        print "--- expected error: %s ---\n" % self.case.GetNegative()
+        print("=== %s was expected to fail in %s, but didn't ===" % (name, mode))
+        print("--- expected error: %s ---\n" % self.case.GetNegative())
       else:
         if long_format:
-          print "=== %s failed in %s ===" % (name, mode)
+          print("=== %s failed in %s ===" % (name, mode))
         else:
-          print "%s in %s: " % (name, mode)
+          print("%s in %s: " % (name, mode))
       self.WriteOutput(sys.stdout)
       if long_format:
-        print "==="
+        print("===")
     elif self.case.IsNegative():
-      print "%s failed in %s as expected" % (name, mode)
+      print("%s failed in %s as expected" % (name, mode))
     else:
-      print "%s passed in %s" % (name, mode)
+      print("%s passed in %s" % (name, mode))
 
   def WriteOutput(self, target):
     out = self.stdout.strip()
@@ -359,7 +359,7 @@ class TestCase(object):
     return result
 
   def Print(self):
-    print self.GetSource()
+    print(self.GetSource())
 
   def validate(self):
     flags = self.testRecord.get("flags")
@@ -470,7 +470,7 @@ class TestSuite(object):
             basename = path.basename(full_path)[:-3]
             name = rel_path.split(path.sep)[:-1] + [basename]
             if EXCLUDE_LIST.count(basename) >= 1:
-              print 'Excluded: ' + basename
+              print('Excluded: ' + basename)
             else:
               if not self.non_strict_only:
                 strict_case = TestCase(self, name, full_path, True)
@@ -493,9 +493,9 @@ class TestSuite(object):
     def write(s):
       if logfile:
         self.logf.write(s + "\n")
-      print s
+      print(s)
 
-    print
+    print()
     write("=== Summary ===");
     count = progress.count
     succeeded = progress.succeeded
@@ -509,12 +509,12 @@ class TestSuite(object):
       positive = [c for c in progress.failed_tests if not c.case.IsNegative()]
       negative = [c for c in progress.failed_tests if c.case.IsNegative()]
       if len(positive) > 0:
-        print
+        print()
         write("Failed Tests")
         for result in positive:
           write("  %s in %s" % (result.case.GetName(), result.case.GetMode()))
       if len(negative) > 0:
-        print
+        print()
         write("Expected to fail but passed ---")
         for result in negative:
           write("  %s in %s" % (result.case.GetName(), result.case.GetMode()))
@@ -567,9 +567,9 @@ class TestSuite(object):
       if full_summary:
         self.PrintFailureOutput(progress, logname)
       else:
-        print
-        print "Use --full-summary to see output from failed tests"
-    print
+        print()
+        print("Use --full-summary to see output from failed tests")
+    print()
     return progress.failed
 
   def WriteLog(self, result):
@@ -601,7 +601,7 @@ class TestSuite(object):
       includes = case.GetIncludeList()
       includes_dict.update(includes)
 
-    print includes_dict
+    print(includes_dict)
 
 
 def Main():
@@ -641,6 +641,6 @@ if __name__ == '__main__':
   try:
     code = Main()
     sys.exit(code)
-  except Test262Error, e:
-    print "Error: %s" % e.message
+  except Test262Error as e:
+    print("Error: %s" % e.message)
     sys.exit(1)
